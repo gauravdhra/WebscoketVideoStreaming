@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <video id="videoPlayer" autoplay width="620" height="340" controls></video>
+    <script>
+          const socket = new WebSocket('ws://localhost:8080');
+            const videoPlayer = document.getElementById('videoPlayer');
+            let videoChunks = [];
+            socket.onopen = function () {
+                socket.send('sendVideo');
+            };
+            socket.onmessage = function (event) {
+                if (typeof event.data === 'string' && event.data === 'videoComplete') {
+                    const concatenatedVideo = new Blob(videoChunks, { type: 'video/mp4' });
+                    const videoURL = URL.createObjectURL(concatenatedVideo);
+                    videoPlayer.src = videoURL;
+                } else {
+                    videoChunks.push(event.data);
+                }
+            };
+
+
+
+
+
+
+    </script>
+
+</body>
+
+</html>

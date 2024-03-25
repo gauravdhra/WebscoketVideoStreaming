@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <video id="videoPlayer" autoplay width="620" height="340" autoplay controls></video>
+    <script>
+          const socket = new WebSocket('ws://localhost:8080');
+            const videoPlayer = document.getElementById('videoPlayer');
+            const mimeCodec = 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"';
+
+            let videoChunks = [];
+            socket.onopen = function () {
+                // Send message to server to request video
+                socket.send('sendVideo');
+            };
+          
+            
+
+
+    const mediaSource = new MediaSource();
+    videoPlayer.src = URL.createObjectURL(mediaSource);
+    
+    mediaSource.addEventListener('sourceopen', function () {
+        const sourceBuffer = mediaSource.addSourceBuffer(mimeCodec);
+        socket.onmessage = function (event) {
+            if (typeof event.data === 'string' && event.data === 'videoComplete') {
+                // All video chunks received, no action needed here
+            } else {
+                // Append received video chunk directly to SourceBuffer
+                sourceBuffer.appendBuffer(event.data);
+            }
+        };
+    });
+
+    socket.onclose = function () {
+        // Handle socket close
+    };
+
+    socket.onerror = function (error) {
+        // Handle socket errors
+    };
+
+
+
+
+
+
+    </script>
+
+</body>
+
+</html>

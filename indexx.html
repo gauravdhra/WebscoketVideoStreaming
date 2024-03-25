@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <video id="videoPlayer" autoplay width="620" height="340" autoplay controls></video>
+    <script>
+        var mediaSource = new MediaSource();
+
+            // Reference to the video element
+            var videoElement = document.getElementById('videoPlayer');
+
+            // Set up event listener for sourceopen event
+            mediaSource.addEventListener('sourceopen', function () {
+                // Create a new SourceBuffer when the MediaSource is opened
+                var sourceBuffer = mediaSource.addSourceBuffer('video/mp4; codecs="avc1.42E01E, mp4a.40.2"');
+
+                // Socket connection to receive MP4 data
+                var socket = new WebSocket('ws://localhost:8080');
+     socket.onopen = function () {
+                // Send message to server to request video
+                socket.send('sendVideo');
+            };
+                // Event handler for receiving MP4 data from the socket
+                socket.onmessage = function (event) {
+                    // Ensure the data received is an ArrayBuffer
+                    if (event.data instanceof ArrayBuffer) {
+                        // Append received data to the SourceBuffer
+                        sourceBuffer.appendBuffer(event.data);
+                    } else {
+                        console.error('Received data is not an ArrayBuffer');
+                    }
+                };
+
+                // Event handler for socket errors
+                socket.onerror = function (error) {
+                    console.error('Socket error:', error);
+                };
+            });
+
+            // Set the MediaSource object as the source of the video element
+            videoElement.src = URL.createObjectURL(mediaSource);
+
+
+
+
+
+
+    </script>
+
+</body>
+
+</html>
